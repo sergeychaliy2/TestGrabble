@@ -426,6 +426,9 @@ MonoBehaviour:
   targetColor: {r: 0, g: 0, b: 0, a: 1}
   colorChangeSpeed: 0.1
   flashLight: {fileID: 1093500162}
+  sphere: {fileID: 104164138}
+  cylinder: {fileID: 1334116120}
+  explosionEffectPrefab: {fileID: 1782759339994894424, guid: 965afb797bb068d43866418ac0a2b260, type: 3}
 --- !u!1 &104164131
 GameObject:
   m_ObjectHideFlags: 0
