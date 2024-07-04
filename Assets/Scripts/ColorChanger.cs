@@ -23,12 +23,13 @@ public class ColorChanger : MonoBehaviour
         }
     }
 
-    void OnTriggerEnter(Collider other)
+    public void OnParticleCollision (GameObject other)
     {
-        if (other.CompareTag("Water"))
+        if (other.gameObject.CompareTag("Water"))
         {
             isChangingColor = true;
             PlaySparksEffect();
+            Debug.Log("Water");
         }
     }
 

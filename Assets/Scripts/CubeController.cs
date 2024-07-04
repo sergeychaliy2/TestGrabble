@@ -4,19 +4,19 @@ using UnityEngine;
 public class CubeController : MonoBehaviour
 {
     public Color targetColor = Color.black;
-    public float colorChangeSpeed = 0.5f;
-    public float flashInterval = 0.5f;
+    public float colorChangeSpeed = 0.1f;
     private Renderer objectRenderer;
-    private Color initialColor;
+    private Color currentColor;
     private bool isChangingColor = false;
-    private bool isBlack = false;
     public Light flashLight;
-    public GameObject explosionPrefab;
+    private Color bfColor = new Color(191f / 255f, 191f / 255f, 191f / 255f);
+    private float colorThreshold = 0.1f;
+    private bool isFullyBlack = false;
 
     void Start()
     {
         objectRenderer = GetComponent<Renderer>();
-        initialColor = objectRenderer.material.color;
+        currentColor = objectRenderer.material.color;
 
         if (flashLight != null)
         {
@@ -24,52 +24,76 @@ public class CubeController : MonoBehaviour
         }
     }
 
-    void Update()
-    {
-        if (isChangingColor)
-        {
-            objectRenderer.material.color = Color.Lerp(objectRenderer.material.color, targetColor, colorChangeSpeed * Time.deltaTime);
-            if (!isBlack && objectRenderer.material.color.Equals(targetColor))
-            {
-                isBlack = true;
-            }
-        }
-    }
-
-    void OnTriggerEnter(Collider other)
+    public void OnParticleCollision(GameObject other)
     {
         if (other.CompareTag("Water"))
         {
-            isChangingColor = true;
-            StartCoroutine(FlashCoroutine());
+            if (!isChangingColor && !isFullyBlack)
+            {
+                StartCoroutine(ChangeColorOverTime(colorChangeSpeed));
+            }
+            if (!isFullyBlack)
+            {
+                StartCoroutine(FlashLight());
+            }
         }
     }
 
-    private IEnumerator FlashCoroutine()
+    private IEnumerator FlashLight()
     {
-        while (!isBlack && isChangingColor)
-        {
-            if (flashLight != null)
-            {
-                flashLight.enabled = !flashLight.enabled;
-            }
-            yield return new WaitForSeconds(flashInterval);
-        }
-
         if (flashLight != null)
         {
+            flashLight.enabled = true;
+            yield return new WaitForSeconds(0.1f);
             flashLight.enabled = false;
         }
     }
 
-    private void OnCollisionEnter(Collision collision)
+    private IEnumerator ChangeColorOverTime(float duration)
     {
-        if (objectRenderer.material.color == targetColor)
+        isChangingColor = true;
+
+        Color startColor = currentColor;
+        Color newTargetColor = Color.Lerp(startColor, targetColor, colorChangeSpeed);
+        float elapsedTime = 0f;
+
+        while (elapsedTime < duration)
         {
-            if (collision.gameObject.CompareTag("Cylinder"))
+            currentColor = Color.Lerp(startColor, newTargetColor, elapsedTime / duration);
+            objectRenderer.material.color = currentColor;
+            elapsedTime += Time.deltaTime;
+            yield return null;
+        }
+
+        currentColor = newTargetColor;
+        objectRenderer.material.color = currentColor;
+        isChangingColor = false;
+
+        if (IsColorCloseToBlack(currentColor))
+        {
+            isFullyBlack = true;
+            if (flashLight != null)
             {
-                Destroy(collision.gameObject);
+                flashLight.enabled = false;
             }
         }
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        if (other.CompareTag("Water"))
+        {
+            StopAllCoroutines();
+            isChangingColor = false;
+            if (flashLight != null && !isFullyBlack)
+            {
+                flashLight.enabled = false;
+            }
+        }
+    }
+
+    private bool IsColorCloseToBlack(Color color)
+    {
+        return color.r <= colorThreshold && color.g <= colorThreshold && color.b <= colorThreshold;
     }
 }
