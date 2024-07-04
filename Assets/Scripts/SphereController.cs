@@ -33,7 +33,7 @@ public class SphereController : MonoBehaviour
         }
     }
 
-    void OnTriggerEnter(Collider other)
+    public void OnParticleCollision (GameObject other)
     {
         if (other.CompareTag("Water"))
         {
