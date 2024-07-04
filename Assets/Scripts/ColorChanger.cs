@@ -29,7 +29,6 @@ public class ColorChanger : MonoBehaviour
         {
             isChangingColor = true;
             PlaySparksEffect();
-            Debug.Log("Water");
         }
     }
 
