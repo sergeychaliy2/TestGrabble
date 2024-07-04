@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class CubeController : MonoBehaviour
 {
-    public Color targetColor = new Color(191f / 255f, 191f / 255f, 191f / 255f);
+    public Color targetColor = new Color(191f / 255f, 191f / 255f, 191f / 255f); // Целевой цвет куба
     public float colorChangeSpeed = 0.1f;
     private Renderer objectRenderer;
     private Color currentColor;
@@ -11,7 +11,10 @@ public class CubeController : MonoBehaviour
     public Light flashLight;
     private float colorThreshold = 0.1f;
     private bool isFullyBlack = false;
+
+    // Ссылки на сферу и цилиндр
     public SphereController sphere;
+    public ColorChanger cylinder;
 
     void Start()
     {
@@ -37,17 +40,36 @@ public class CubeController : MonoBehaviour
                 StartCoroutine(FlashLight());
             }
 
+            // Проверяем соприкосновение с сферой
             if (sphere != null && IsColorCloseToBlack(currentColor))
             {
                 Collider cubeCollider = GetComponent<Collider>();
                 Collider sphereCollider = sphere.GetComponent<Collider>();
                 if (cubeCollider != null && sphereCollider != null && cubeCollider.bounds.Intersects(sphereCollider.bounds))
                 {
+                    // Проверяем цвет куба
                     if (currentColor.r >= targetColor.r - colorThreshold &&
                         currentColor.g >= targetColor.g - colorThreshold &&
                         currentColor.b >= targetColor.b - colorThreshold)
                     {
-                        sphere.gameObject.SetActive(false);
+                        sphere.gameObject.SetActive(false); // Делаем сферу неактивной
+                    }
+                }
+            }
+
+            // Проверяем соприкосновение с цилиндром
+            if (cylinder != null && IsColorCloseToBlack(currentColor))
+            {
+                Collider cubeCollider = GetComponent<Collider>();
+                Collider cylinderCollider = cylinder.GetComponent<Collider>();
+                if (cubeCollider != null && cylinderCollider != null && cubeCollider.bounds.Intersects(cylinderCollider.bounds))
+                {
+                    // Проверяем цвет куба
+                    if (currentColor.r >= targetColor.r - colorThreshold &&
+                        currentColor.g >= targetColor.g - colorThreshold &&
+                        currentColor.b >= targetColor.b - colorThreshold)
+                    {
+                        cylinder.gameObject.SetActive(false); // Делаем цилиндр неактивным
                     }
                 }
             }
@@ -118,7 +140,14 @@ public class CubeController : MonoBehaviour
         {
             if (IsColorCloseToBlack(currentColor))
             {
-                sphere.gameObject.SetActive(false);
+                sphere.gameObject.SetActive(false); // Делаем сферу неактивной
+            }
+        }
+        else if (collision.gameObject.CompareTag("Cylinder"))
+        {
+            if (IsColorCloseToBlack(currentColor))
+            {
+                cylinder.gameObject.SetActive(false); // Делаем цилиндр неактивным
             }
         }
     }
