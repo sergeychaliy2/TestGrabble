@@ -3,15 +3,15 @@ using UnityEngine;
 
 public class CubeController : MonoBehaviour
 {
-    public Color targetColor = Color.black;
+    public Color targetColor = new Color(191f / 255f, 191f / 255f, 191f / 255f);
     public float colorChangeSpeed = 0.1f;
     private Renderer objectRenderer;
     private Color currentColor;
     private bool isChangingColor = false;
     public Light flashLight;
-    private Color bfColor = new Color(191f / 255f, 191f / 255f, 191f / 255f);
     private float colorThreshold = 0.1f;
     private bool isFullyBlack = false;
+    public SphereController sphere;
 
     void Start()
     {
@@ -35,6 +35,21 @@ public class CubeController : MonoBehaviour
             if (!isFullyBlack)
             {
                 StartCoroutine(FlashLight());
+            }
+
+            if (sphere != null && IsColorCloseToBlack(currentColor))
+            {
+                Collider cubeCollider = GetComponent<Collider>();
+                Collider sphereCollider = sphere.GetComponent<Collider>();
+                if (cubeCollider != null && sphereCollider != null && cubeCollider.bounds.Intersects(sphereCollider.bounds))
+                {
+                    if (currentColor.r >= targetColor.r - colorThreshold &&
+                        currentColor.g >= targetColor.g - colorThreshold &&
+                        currentColor.b >= targetColor.b - colorThreshold)
+                    {
+                        sphere.gameObject.SetActive(false);
+                    }
+                }
             }
         }
     }
@@ -95,5 +110,16 @@ public class CubeController : MonoBehaviour
     private bool IsColorCloseToBlack(Color color)
     {
         return color.r <= colorThreshold && color.g <= colorThreshold && color.b <= colorThreshold;
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.CompareTag("Sphere"))
+        {
+            if (IsColorCloseToBlack(currentColor))
+            {
+                sphere.gameObject.SetActive(false);
+            }
+        }
     }
 }

@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Water
   - Cylinder
+  - Sphere
   layers:
   - Default
   - TransparentFX
